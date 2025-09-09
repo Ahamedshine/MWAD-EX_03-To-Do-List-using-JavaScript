@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo App with Dark Mode</title>
+<style>
+  /* Base Styles */
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #eda8ce;
+    color: #131313;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  body.dark {
+    background-color: #121212;
+    color: #f4f4f4;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  body.dark .container {
+    background-color: #1e1e1e;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .dark-mode-toggle {
+    display: block;
+    margin: 10px auto;
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+
+  body.dark .dark-mode-toggle {
+    background-color: #f4f4f4;
+    color: #121212;
+  }
+
+  form {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  body.dark input[type="text"] {
+    background-color: #333;
+    color: #f4f4f4;
+    border: 1px solid #555;
+  }
+
+  button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .add-btn {
+    background-color: #28a745;
+    color: white;
+    margin-left: 10px;
+  }
+
+  .edit-btn {
+    background-color: #ffc107;
+    color: #333;
+    margin-right: 5px;
+  }
+
+  .delete-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    padding: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s;
+  }
+
+  body.dark li {
+    background-color: #2c2c2c;
+  }
+
+  li.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  .actions {
+    display: flex;
+    gap: 5px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Todo App</h1>
+  <button class="dark-mode-toggle">Toggle Dark Mode</button>
+  <form id="todo-form">
+    <input type="text" id="todo-input" placeholder="Enter new todo" required>
+    <button type="submit" class="add-btn">Add</button>
+  </form>
+  <ul id="todo-list"></ul>
+</div>
+
+<script>
+  const form = document.getElementById('todo-form');
+  const input = document.getElementById('todo-input');
+  const list = document.getElementById('todo-list');
+  const toggleBtn = document.querySelector('.dark-mode-toggle');
+
+  // Load todos from localStorage
+  let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+  const saveTodos = () => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }
+
+  const renderTodos = () => {
+    list.innerHTML = '';
+    todos.forEach((todo, index) => {
+      const li = document.createElement('li');
+      li.className = todo.completed ? 'completed' : '';
+      li.innerHTML = `
+        <span>${todo.text}</span>
+        <div class="actions">
+          <button class="edit-btn">Edit</button>
+          <button class="delete-btn">Delete</button>
+        </div>
+      `;
+      // Mark complete on click
+      li.querySelector('span').addEventListener('click', () => {
+        todos[index].completed = !todos[index].completed;
+        saveTodos();
+        renderTodos();
+      });
+
+      // Edit todo
+      li.querySelector('.edit-btn').addEventListener('click', () => {
+        const newText = prompt('Edit todo:', todo.text);
+        if (newText !== null && newText.trim() !== '') {
+          todos[index].text = newText.trim();
+          saveTodos();
+          renderTodos();
+        }
+      });
+
+      // Delete todo
+      li.querySelector('.delete-btn').addEventListener('click', () => {
+        todos.splice(index, 1);
+        saveTodos();
+        renderTodos();
+      });
+
+      list.appendChild(li);
+    });
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if(text) {
+      todos.push({ text, completed: false });
+      saveTodos();
+      renderTodos();
+      input.value = '';
+    }
+  });
+
+  // Dark mode toggle
+  toggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+  });
+
+  renderTodos();
+</script>
+</body>
+</html>
